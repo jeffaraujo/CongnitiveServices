@@ -51,6 +51,22 @@ namespace CongnitiveServices.AzureSearch
                 new SearchCredentials("4A91F9970AB73ADB4106D6BC56FD0EE2"));
 
             var index = searchServiceClient.Indexes.GetClient("index-bandas");
+            var index2 = searchServiceClient.Indexes.Get("index-bandas");
+            index2.Analyzers.Add(new PatternAnalyzer() { Name = "custom", Pattern = @"||,||" });
+
+            index2.Analyzers.Add(new CustomAnalyzer()
+            {
+                Name = "custom",
+                Tokenizer = TokenizerName.Standard,
+                TokenFilters = new[] { TokenFilterName.Phonetic
+                                        , TokenFilterName.Lowercase
+                                        , TokenFilterName.AsciiFolding }
+            });
+
+            index2.Fields[3].Analyzer = "custom";
+            searchServiceClient.Indexes.CreateOrUpdate(index2, true);
+
+
             //Gerando um item para ser gravado no índice
             var batch = IndexBatch.Upload<IndexLetras>(new List<IndexLetras>
             {
